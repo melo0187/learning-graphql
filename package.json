@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon -e js,json,graphql",
+    "start": "nodemon -e js,json,graphql --delay 500ms",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,9 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "apollo-server-express": "^2.4.8",
+    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
     "graphql-playground-middleware-express": "^1.7.12",
+    "mongodb": "^3.1.13",
+    "node-fetch": "^2.3.0",
     "nodemon": "^1.18.10"
   }
 }
