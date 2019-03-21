@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon -e js,json,graphql --delay 500ms",
+    "start": "nodemon -e js,json,graphql --delay 1000ms",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
