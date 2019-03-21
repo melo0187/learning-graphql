@@ -57,7 +57,7 @@ const resolvers = {
       return await db.collection('photos').findOne({ _id: ObjectID(args.photoID) })
     },
 
-    async githubAuth(parent, { code }, { db }) {
+    async githubAuth(parent, { code }, { db, pubsub }) {
 
       let {
         message,
@@ -82,15 +82,18 @@ const resolvers = {
         avatar: avatar_url
       }
 
-      const { ops: [user] } = await db
+      const { ops: [user], result } = await db
         .collection('users')
         .replaceOne({ githubLogin: login }, latestUserInfo, { upsert: true })
+
+      // result.upserted is only defined when a new document has been created -> new user
+      result.upserted && pubsub.publish('user-added', { newUser: user })
 
       return { user, token: access_token }
 
     },
 
-    addFakeUsers: async (parent, { count }, { db }) => {
+    addFakeUsers: async (parent, { count }, { db, pubsub }) => {
       var randomUserApi = `https://randomuser.me/api/?results=${count}`
 
       var { results } = await fetch(randomUserApi).then(res => res.json())
@@ -103,6 +106,10 @@ const resolvers = {
       }))
 
       await db.collection('users').insertMany(users)
+
+      users.forEach(newUser => {
+        pubsub.publish('user-added', { newUser })
+      });
 
       return users
     },
@@ -124,6 +131,10 @@ const resolvers = {
     newPhoto: {
       subscribe: (parent, args, { pubsub }) =>
         pubsub.asyncIterator('photo-added')
+    },
+    newUser: {
+      subscribe: (parent, args, { pubsub }) =>
+        pubsub.asyncIterator('user-added')
     }
   },
   Photo: {
