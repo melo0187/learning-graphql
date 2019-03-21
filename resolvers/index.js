@@ -1,7 +1,8 @@
 const { GraphQLScalarType } = require('graphql')
-const { authorizeWithGithub } = require('../lib')
+const { authorizeWithGithub, uploadStream } = require('../lib')
 const fetch = require('node-fetch')
 const ObjectID = require('mongodb').ObjectID
+const path = require('path')
 
 const resolvers = {
   Query: {
@@ -38,6 +39,13 @@ const resolvers = {
       }
       const { insertedId } = await db.collection('photos').insertOne(newPhoto)
       newPhoto.id = insertedId
+
+      var toPath = path.join(
+        __dirname, '..', 'assets', 'photos', `${newPhoto.id}.jpg`
+      )
+
+      const { stream } = await args.input.file
+      await uploadStream(stream, toPath)
 
       pubsub.publish('photo-added', { newPhoto })
 
