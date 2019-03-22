@@ -3,6 +3,7 @@ const { ApolloServer, PubSub } = require('apollo-server-express')
 const express = require('express')
 const expressPlayground = require('graphql-playground-middleware-express').default
 const depthLimit = require('graphql-depth-limit')
+const { createComplexityLimitRule } = require('graphql-validation-complexity')
 
 const { readFileSync } = require('fs')
 const path = require('path')
@@ -27,7 +28,12 @@ async function start() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    validationRules: [depthLimit(5)],
+    validationRules: [
+      depthLimit(5),
+      createComplexityLimitRule(1000, {
+        onCost: cost => console.log('query cost: ', cost)
+      })
+    ],
     context: async ({ req, connection }) => {
       const githubToken = req ?
         req.headers.authorization :
