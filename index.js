@@ -2,6 +2,7 @@ const { createServer } = require('http')
 const { ApolloServer, PubSub } = require('apollo-server-express')
 const express = require('express')
 const expressPlayground = require('graphql-playground-middleware-express').default
+const depthLimit = require('graphql-depth-limit')
 
 const { readFileSync } = require('fs')
 const path = require('path')
@@ -26,6 +27,7 @@ async function start() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    validationRules: [depthLimit(5)],
     context: async ({ req, connection }) => {
       const githubToken = req ?
         req.headers.authorization :
@@ -49,7 +51,7 @@ async function start() {
   server.installSubscriptionHandlers(httpServer)
 
   httpServer.timeout = 5000
-  
+
   httpServer.listen({ port: 4000 }, () =>
     console.log(`GraphQL Server running at localhost:4000${server.graphqlPath}`)
   )
